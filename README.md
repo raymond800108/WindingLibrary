@@ -32,7 +32,7 @@ WindingClass </br >
 
 ## Rhino and Grasshopper Files
 The latest version of the Rhino model and Grasshopper file can be found in Google Drive within the fabrication folder of the current design phase. See link below. <br />
-[Fabrication Folder] (https://drive.google.com/open?id=1-NvEibNWGSiWkUpBPFH5GkPmLzh_SPTq)
+[Fabrication Folder](https://drive.google.com/open?id=1-NvEibNWGSiWkUpBPFH5GkPmLzh_SPTq)
 
 This folder is broken up into 4 folders:
 1. GH
