@@ -53,30 +53,31 @@ public partial class WindingClassConstructor : GH_ScriptInstance
     #endregion
 
 
-    private void RunScript(Polyline poly, Surface srf, double offset, ref object oIsoCurves, ref object oWindingPoints, ref object oPlanes)
+    private void RunScript(Polyline iPolyline, Surface iSrf, ref object oIsoCurves, ref object oWindingObjects, ref object oPlanes)
 
     {
         // <Custom code>
+
         List<WindingClass> windingPoints = new List<WindingClass>();
         List<Plane> windingPlanes = new List<Plane>();
-        List<Curve> curves = new List<Curve>();
+        List<Curve> isoCurves = new List<Curve>();
         
-        for (int i = 0; i < poly.Count; i++)
+        for (int i = 0; i < iPolyline.Count; i++)
         {
-            WindingClass tempWC = new WindingClass(poly, i, srf);
+            WindingClass tempWC = new WindingClass(iPolyline, i, iSrf);
             windingPoints.Add(tempWC);
         }
 
         foreach (WindingClass wC in windingPoints)
         {
-            windingPlanes.Add(wC.pln);
-            curves.Add(wC._iso);
-            Print(wC.frameIndex.ToString());
+            windingPlanes.Add(wC.basePlane);
+            isoCurves.Add(wC.iso);
+            Print(wC.edgeIndex.ToString());
         }
 
-        oWindingPoints = windingPoints;
+        oWindingObjects = windingPoints;
         oPlanes = windingPlanes;
-        oIsoCurves = curves;
+        oIsoCurves = isoCurves;
 
         // </Custom code>
     }

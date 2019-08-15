@@ -54,29 +54,20 @@ public partial class CustomAxisRotation : GH_ScriptInstance
     #endregion
 
 
-    private void RunScript(List<System.Object> iWP, ref object oAngles)
+    private void RunScript(List<System.Object> iWindingObjects, ref object oAngles)
 
     {
         // <Custom code>
-        List<WindingClass> windingObjects = new List<WindingClass>();
         DataTree<double> positionerAngles = new DataTree<double>();
-        for (var index = 0; index < iWP.Count-1; index++)
+
+        for (var index = 0; index < iWindingObjects.Count-1; index++)
         {
             GH_Path pth = new GH_Path(index);
-            WindingClass wp = (WindingClass)iWP[index];
+            WindingClass wp = (WindingClass)iWindingObjects[index];
 
-            List<Curve> surfaceEdges = new List<Curve>();
-            Brep closestBrep = wp.srf.ToBrep();
-            surfaceEdges.AddRange(closestBrep.Curves3D);
-            NurbsCurve edge = surfaceEdges[wp.frameIndex].ToNurbsCurve();
-            edge.Domain = new Interval(0, 1);
-            double param;
-            edge.ClosestPoint(wp.pln.Origin, out param);
-
-
-            if (wp.frameIndex == 1)
+            if (wp.edgeIndex == 1)
             {
-                if (param > 0.5)
+                if (wp.edgeParam > 0.5)
                 {
                     positionerAngles.Add(-195, pth);
                 }
@@ -85,24 +76,24 @@ public partial class CustomAxisRotation : GH_ScriptInstance
                     positionerAngles.Add(-215, pth);
                 }
             }
-            else if (wp.frameIndex == 3)
+            else if (wp.edgeIndex == 3)
             {
-                if (param > 0.5)
+                if (wp.edgeParam > 0.5)
                 {
-                    positionerAngles.Add(-215, pth);
+                    positionerAngles.Add(-235, pth);
                 }
                 else
                 {
-                    positionerAngles.Add(-190, pth);
+                    positionerAngles.Add(-220, pth);
                 }
             }
-            else if (wp.frameIndex == 2)
+            else if (wp.edgeIndex == 2)
             {
                 positionerAngles.Add(-175, pth);
 
 
             }
-            else if (wp.frameIndex == 0)
+            else if (wp.edgeIndex == 0)
             {
                 positionerAngles.Add(-215, pth);
 

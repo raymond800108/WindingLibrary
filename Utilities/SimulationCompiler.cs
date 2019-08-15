@@ -38,7 +38,7 @@ using Rhino.Geometry.Intersect;
 
 #endregion
 
-public partial class VB_Translated : GH_ScriptInstance
+public partial class SimulationCompiler : GH_ScriptInstance
 {
     #region Do_not_modify_this_region
     private void Print(string text) { }
@@ -53,19 +53,19 @@ public partial class VB_Translated : GH_ScriptInstance
     #endregion
 
 
-    private void RunScript(List<Plane> N, List<double> E1, double E, double S, bool T, ref object A, ref object B, ref object C, ref object poly, ref object Debug)
+    private void RunScript(List<Plane> iTravelPlanes, List<double> iPositionerRotation, double iTimeline, double iStepResolution, bool iPlaySim, ref object oCurrentTCP, ref object oCurrentTimestep, ref object oPositionerRotation, ref object oTravelPolyline, ref object Debug)
     {
         // <Custom code>
-        if (T)
+        if (iPlaySim)
         {
-            _inc = E;
+            _inc = iTimeline;
             _len = 0;
             _poly = new Polyline();
-            _plane = N[0];
-            _ex = RhinoMath.ToRadians(E1[0]);
+            _plane = iTravelPlanes[0];
+            _ex = RhinoMath.ToRadians(iPositionerRotation[0]);
 
         // Step 1: Get the length of the tool path
-            foreach (Plane _pl in N)
+            foreach (Plane _pl in iTravelPlanes)
             {
                 _poly.Add(_pl.Origin);
             }
@@ -74,7 +74,7 @@ public partial class VB_Translated : GH_ScriptInstance
         }
         else
         {
-            _inc += S / _len;
+            _inc += iStepResolution / _len;
             if (_inc > 1)
             {
                 _inc = 1;
@@ -91,21 +91,21 @@ public partial class VB_Translated : GH_ScriptInstance
         int _index = (int)Math.Floor(_param);
         Line _line = _poly.SegmentAt(_index);
         double _t = _line.ClosestParameter(_pt);
-        Plane _P0 = N[_index];
-        double _EX0 = E1[_index];
+        Plane _P0 = iTravelPlanes[_index];
+        double _EX0 = iPositionerRotation[_index];
 
         Plane _P1;
         double _EX1;
 
         if (_index == _poly.SegmentCount)
         {
-            _P1 = N[_index];
-            _EX1 = E1[_index];
+            _P1 = iTravelPlanes[_index];
+            _EX1 = iPositionerRotation[_index];
         }
         else
         {
-            _P1 = N[_index + 1];
-            _EX1 = E1[_index + 1];
+            _P1 = iTravelPlanes[_index + 1];
+            _EX1 = iPositionerRotation[_index + 1];
         }
 
         Point3d _origin = _P0.Origin + _t * (_P1.Origin - _P0.Origin);
@@ -115,10 +115,10 @@ public partial class VB_Translated : GH_ScriptInstance
         _ex = _EX0 + _t * minPI(_EX1 - _EX0);
         Print(minPI(_EX1 - _EX0).ToString());
 
-        A = _plane;
-        B = Math.Round(_inc * 100, 3);
-        C = _ex;
-        poly = _poly;
+        oCurrentTCP = _plane;
+        oCurrentTimestep = Math.Round(_inc * 100, 3);
+        oPositionerRotation = _ex;
+        oTravelPolyline = _poly;
 
         // </Custom code>
     }

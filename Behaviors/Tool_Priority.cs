@@ -73,10 +73,6 @@ public partial class Tool_Priority : GH_ScriptInstance
                 refAngles.Add(0);
             }
         }
-        else
-        {
-            Debug = "Data tress do not match!";
-        }
 
         List<double> angles = new List<double>();
         for (int i = 0; i < iVectors.Count-1; i++)
@@ -96,8 +92,6 @@ public partial class Tool_Priority : GH_ScriptInstance
         }
 
         oAngle = sum;
-
-
         // </Custom code>
     }
 

@@ -54,53 +54,50 @@ public partial class TravelBehaviour : GH_ScriptInstance
     #endregion
 
 
-    private void RunScript(List<System.Object> wp, double VecAmp, Curve axis, List<Curve> crvs, bool isBackSyntax, ref object A, ref object B, ref object C)
+    private void RunScript(List<System.Object> iWindingObjects, double iVecAmp, Curve iAxis, List<Curve> iSyntaxCurves, bool iBackSyntax, ref object oWindingObjects, ref object iTravelPlanes, ref object iAllPlanes)
     {
         // <Custom code>
      
-        List<WindingClass> windingObjects = new List<WindingClass>();
-        DataTree<Plane> Pth = new DataTree<Plane>();
-        DataTree<Plane> Move = new DataTree<Plane>();
+        DataTree<Plane> allPlanes = new DataTree<Plane>();
+        DataTree<Plane> travelPlanes = new DataTree<Plane>();
         GH_Path pth = new GH_Path(0);
-        Print(isBackSyntax.ToString());
-        for (var index = 0; index < wp.Count-1; index++)
+        List<WindingClass> windingObjects = new List<WindingClass>();
+
+
+        for (var index = 0; index < iWindingObjects.Count-1; index++)
         {
             pth = new GH_Path(index);
-            WindingClass wC = (WindingClass)wp[index];
-            wC.path = Path(wC, (WindingClass) wp[index + 1], crvs[index], axis, VecAmp, isBackSyntax);
-            Move.AddRange(wC.path, pth);
-            Pth.AddRange(wC.rect, pth);
-            Pth.AddRange(wC.path, pth);
+            WindingClass wC = (WindingClass)iWindingObjects[index];
+            wC.travelPath = CreateTravelPath(wC, (WindingClass) iWindingObjects[index + 1], iSyntaxCurves[index], iAxis, iVecAmp, iBackSyntax);
+            travelPlanes.AddRange(wC.travelPath, pth);
+            allPlanes.AddRange(wC.windingPath, pth);
+            allPlanes.AddRange(wC.travelPath, pth);
             windingObjects.Add(wC);
         }
 
-        // Double check this not sure if pth count is valid branch...
-        WindingClass lastItem = (WindingClass) wp[wp.Count - 1];
-        Pth.AddRange(lastItem.rect, pth);
+        // Deal with last winding plane since it dosn't have two neighbors
+        WindingClass lastItem = (WindingClass) iWindingObjects[iWindingObjects.Count - 1];
+        allPlanes.AddRange(lastItem.windingPath, pth);
         windingObjects.Add((WindingClass)windingObjects.Last());
 
-        A = windingObjects;
-        B = Move;
-        C = Pth;
-
-        //a = wp #class 
-        //b = Move #just inbetween planes
-        //c = Pth #path including wrapping planes 
+        oWindingObjects = windingObjects;
+        iTravelPlanes = travelPlanes;
+        iAllPlanes = allPlanes;
 
         // </Custom code>
     }
 
     // <Custom additional code>
-    List<Plane> Path(WindingClass wC, WindingClass nextWC, Curve curve, Curve axis, double VecAmp, bool isBackSyntax)
+    List<Plane> CreateTravelPath(WindingClass wC, WindingClass nextWC, Curve curve, Curve axis, double VecAmp, bool isBackSyntax)
     {
         List<Plane> path = new List<Plane>();
 
         Point3d[] geoDiv;
         int divisionCount = 20;
-        //curve.DivideByLength(130, true, out geoDiv);
         curve.DivideByCount(divisionCount, true, out geoDiv);
         curve.Domain = new Interval(0, 1);
         Point3d midPoint = axis.PointAt(0.55);
+
         for (int i = 0; i < geoDiv.Length - 1; i++)
         {
             double u;
@@ -110,24 +107,22 @@ public partial class TravelBehaviour : GH_ScriptInstance
             wC.srf.FrameAt(u, v, out rpln);
             double param;
             axis.ClosestPoint(geoDiv[i], out param);
-            Point3d origin = axis.PointAt(param);
 
           
             // Offset plane from surface
             Vector3d V = rpln.ZAxis;
-            //rpln.Origin = geoDiv[i];
             V.Unitize();
             Vector3d vec = V * VecAmp;
             rpln.Origin -= vec;
 
-            // if is back syntax add vector that orients the planes towards the middle
+            // If is back syntax add vector that attracts the planes towards the middle
             if (isBackSyntax)
             {
 
-                Vector3d toMid = nextWC.pln.Origin - midPoint;
+                Vector3d toMid = nextWC.basePlane.Origin - midPoint;
                 Vector3d toMidNoZ = new Vector3d(toMid.X, toMid.Y, 0);
 
-                Vector3d toMidCurrent = wC.pln.Origin - midPoint;
+                Vector3d toMidCurrent = wC.basePlane.Origin - midPoint;
                 Vector3d toMidNoZCurrent = new Vector3d(toMidCurrent.X, toMidCurrent.Y, 0);
 
 
@@ -136,12 +131,12 @@ public partial class TravelBehaviour : GH_ScriptInstance
 
                 if (toMidNoZ.Length >= 1000)
                 {
-                    if (toMidNoZCurrent.Length >= 1000 && wC.frameIndex != nextWC.frameIndex)
+                    if (toMidNoZCurrent.Length >= 1000 && wC.edgeIndex != nextWC.edgeIndex)
                     {
                         localToMidNoZ += Vector3d.ZAxis*-400;
                         rpln.Origin -= localToMidNoZ * 0.75;
                     }
-                    else if(wC.frameIndex != nextWC.frameIndex)
+                    else if(wC.edgeIndex != nextWC.edgeIndex)
                     {
                         rpln.Origin -= localToMidNoZ * 0.5;
                     }
@@ -159,35 +154,25 @@ public partial class TravelBehaviour : GH_ScriptInstance
             xyPlane.Rotate(RhinoMath.ToRadians(-15), xyPlane.YAxis, xyPlane.Origin);
 
             // Rotate plane so robot is pulling fiber, reduces friction
-            if (nextWC.pln.Origin.Y > wC.pln.Origin.Y)
+            if (nextWC.basePlane.Origin.Y > wC.basePlane.Origin.Y)
             {
                 Transform tf3 = Transform.Rotation(RhinoMath.ToRadians(-45), xyPlane.XAxis, xyPlane.Origin);
                 xyPlane.Transform(tf3);
-
-
             }
             else
             {
                 Transform tf3 = Transform.Rotation(RhinoMath.ToRadians(45), xyPlane.XAxis, xyPlane.Origin);
                 xyPlane.Transform(tf3);
-
             }
 
-            //xyPlane.Rotate(a, xyPlane.ZAxis, xyPlane.Origin);
+
             if (i < 4 || i > divisionCount-4)
             {
-
-                //Plane firstPlanes = new Plane(wC.pln);
-                //firstPlanes.Origin = xyPlane.Origin;
-                //firstPlanes.Rotate(RhinoMath.ToRadians(180), firstPlanes.XAxis, firstPlanes.Origin);
-                //path.Add(firstPlanes);
-                //path.Add(xyPlane);
 
             }
             else
             {
                 path.Add(xyPlane);
-
             }
 
         }

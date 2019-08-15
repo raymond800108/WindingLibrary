@@ -53,42 +53,20 @@ public partial class WindingBehaviour : GH_ScriptInstance
     #endregion
 
 
-    private void RunScript(List<System.Object> wp, Interval height, Interval width, Interval length, Surface minsrf, ref object oWindingPoints, ref object oWrap, ref object oNoWrap)
+    private void RunScript(List<System.Object> iWindingObjects, Interval iHeight, Interval iWidth, Interval iLength, ref object oWindingPoints, ref object oWrap, ref object oNoWrap)
     {
         // <Custom code>
         DataTree<Plane> wrap = new DataTree<Plane>();
         DataTree<Plane> noWrap = new DataTree<Plane>();
 
         List<WindingClass> windingObjects = new List<WindingClass>();
-        for (var index = 0; index < wp.Count; index++)
+        for (var index = 0; index < iWindingObjects.Count; index++)
         {
             GH_Path pth = new GH_Path(index);
-            WindingClass wC = (WindingClass)wp[index];
-            Plane pln = wC.orientation;
-            Point3d origin = pln.Origin;
-            double u;
-            double v;
-            wC.srf.ClosestPoint(origin, out u, out v);
-            Point3d srfPt = wC.srf.PointAt(u, v);
-            double dist2srf = origin.DistanceTo(srfPt);
-
-            // Again same code in both if and else... -_-
-            if (wC.frameIndex == 1)
-            {
-                wC.rect = Rect(wC, width, height, length);
-                //for (int i = 0; i < wC.rect.Count; i++)
-                //{
-                //    wC.rect[i].Rotate(RhinoMath.ToRadians(90), wC.rect[i].ZAxis, wC.rect[i].Origin);
-                //}
-                    
-            }
-            else
-            {
-                wC.rect = Rect(wC, width, height, length);
-                
-            }
-            wrap.AddRange(wC.rect, pth);
-            noWrap.Add(wC.orientation, pth);
+            WindingClass wC = (WindingClass)iWindingObjects[index];
+            wC.windingPath = CreateWindingPath(wC, iWidth, iHeight, iLength);
+            wrap.AddRange(wC.windingPath, pth);
+            noWrap.Add(wC.attackAngle, pth);
             windingObjects.Add(wC);
         }
 
@@ -100,12 +78,12 @@ public partial class WindingBehaviour : GH_ScriptInstance
     }
 
     // <Custom additional code>
-    List<Plane> Rect(WindingClass wC, Interval width, Interval height, Interval length)
+    List<Plane> CreateWindingPath(WindingClass wC, Interval width, Interval height, Interval length)
     {
         List<Plane> behav = new List<Plane>();
-        Plane pln = wC.orientation;
+        Plane pln = wC.attackAngle;
 
-        if (wC.frameIndex == 0 || wC.frameIndex == 2)
+        if (wC.edgeIndex == 0 || wC.edgeIndex == 2)
         {
             pln.Rotate(RhinoMath.ToRadians(-180), pln.XAxis);
         }
@@ -146,7 +124,7 @@ public partial class WindingBehaviour : GH_ScriptInstance
         //Point3d movedCorner4 = corners[4];
 
         //// LOL same code in if else comeon
-        //if (wC.frameIndex == 0 || wC.frameIndex == 2)
+        //if (wC.edgeIndex == 0 || wC.edgeIndex == 2)
         //{
         //    movedCorner2 += (corners[5] - corners[1]) * -1 * backHook;
         //    movedCorner4 += (corners[1] - corners[2]) * -2 * backHook;
@@ -173,7 +151,7 @@ public partial class WindingBehaviour : GH_ScriptInstance
         // Box
         for (int i = 0; i < corners.Count; i++)
         {
-            Plane pla = wC.orientation;
+            Plane pla = wC.attackAngle;
             pla.Origin = corners[i];
             behav.Add(pla);
         }

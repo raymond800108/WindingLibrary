@@ -53,57 +53,43 @@ public partial class WindingAttackAngle : GH_ScriptInstance
     #endregion
 
 
-    private void RunScript(List<System.Object> wp, List<double> ang, Point3d AxisP1, Point3d AxisP2, ref object oWindingPoints, ref object planes)
+    private void RunScript(List<System.Object> iWindingObjects, ref object oWindingObjects, ref object oPlanes)
     {
         // <Custom code>
         List<Plane> processedPlanes = new List<Plane>();
         List<WindingClass> windingObjects = new List<WindingClass>();
-        for (var index = 0; index < wp.Count; index++)
+        for (var index = 0; index < iWindingObjects.Count; index++)
         {
-            WindingClass wC = (WindingClass) wp[index];
-            wC.orientation = Orientation(wC);
-            processedPlanes.Add(wC.orientation);
+            WindingClass wC = (WindingClass)iWindingObjects[index];
+            wC.attackAngle = AdjustAttackAngle(wC);
+            processedPlanes.Add(wC.attackAngle);
             windingObjects.Add(wC);
         }
 
-        oWindingPoints = windingObjects;
-        planes = processedPlanes;
+        oWindingObjects = windingObjects;
+        oPlanes = processedPlanes;
 
 
         // </Custom code>
     }
 
     // <Custom additional code>
-    Plane Orientation(WindingClass wp)
+    Plane AdjustAttackAngle(WindingClass wp)
     {
-        List<Curve> surfaceEdges = new List<Curve>();
-        Brep closestBrep = wp.srf.ToBrep();
-        surfaceEdges.AddRange(closestBrep.Curves3D);
 
-        NurbsCurve edge = surfaceEdges[wp.frameIndex].ToNurbsCurve();
-
-        NurbsCurve rebuilt = edge.Rebuild(250, 5, false);
-        rebuilt.Domain = new Interval(0, 1);
-        double param;
-        rebuilt.ClosestPoint(wp.pln.Origin, out param);
-
-        Vector3d tangent = rebuilt.TangentAt(param);
+        Vector3d tangent = wp.edgeCurve.TangentAt(wp.edgeParam);
 
         Plane tempPln;
-        rebuilt.FrameAt(param, out tempPln);
+        wp.edgeCurve.FrameAt(wp.edgeParam, out tempPln);
 
         Vector3d perpVector = Vector3d.CrossProduct(tangent, tempPln.YAxis);
 
-        Plane npln = new Plane(wp.pln.Origin, perpVector, tangent);
-
-        //Plane npln = new Plane(wp.pln);
-        //npln.Rotate(RhinoMath.ToRadians(180), npln.YAxis);
-        //npln.Rotate(RhinoMath.ToRadians(180), npln.ZAxis);
+        Plane npln = new Plane(wp.basePlane.Origin, perpVector, tangent);
 
 
-        if (wp.frameIndex == 1)
+        if (wp.edgeIndex == 1)
         {
-            if (param > 0.5)
+            if (wp.edgeParam > 0.5)
             {
                 npln.Rotate(RhinoMath.ToRadians(110), npln.ZAxis);
                 npln.Rotate(RhinoMath.ToRadians(25), npln.XAxis);
@@ -115,10 +101,10 @@ public partial class WindingAttackAngle : GH_ScriptInstance
             }
         }
         // Adjust these angles on edge 3! Very problematic at the moment
-        else if (wp.frameIndex == 3)
+        else if (wp.edgeIndex == 3)
         {
             npln.Rotate(RhinoMath.ToRadians(15), npln.XAxis); // Rotate out
-            if (param > 0.5)
+            if (wp.edgeParam > 0.5)
             {
                 npln.Rotate(RhinoMath.ToRadians(15), npln.ZAxis);
                 npln.Rotate(RhinoMath.ToRadians(5), npln.XAxis);
@@ -134,11 +120,15 @@ public partial class WindingAttackAngle : GH_ScriptInstance
             }
 
         }
-        else if(wp.frameIndex == 2)
+        else if(wp.edgeIndex == 2)
         {
-            npln.Rotate(RhinoMath.ToRadians(-90), npln.ZAxis);
+            npln.Rotate(RhinoMath.ToRadians(90), npln.ZAxis);
+            npln.Rotate(RhinoMath.ToRadians(180), npln.YAxis);
             npln.Rotate(RhinoMath.ToRadians(-60), npln.XAxis);
-            if (param > 0.5)
+
+
+
+            if (wp.edgeParam > 0.5)
             {
                 npln.Rotate(RhinoMath.ToRadians(25), npln.ZAxis);
 
@@ -150,11 +140,11 @@ public partial class WindingAttackAngle : GH_ScriptInstance
             }
 
         }
-        else if (wp.frameIndex == 0)
+        else if (wp.edgeIndex == 0)
         {
             npln.Rotate(RhinoMath.ToRadians(90), npln.ZAxis);
-            npln.Rotate(RhinoMath.ToRadians(90), npln.XAxis);
-            if (param > 0.5)
+            npln.Rotate(RhinoMath.ToRadians(-90), npln.XAxis);
+            if (wp.edgeParam > 0.5)
             {
                 npln.Rotate(RhinoMath.ToRadians(-25), npln.ZAxis);
 
