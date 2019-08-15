@@ -14,22 +14,20 @@ WindingBehaviour </br >
 TravelBehaviour </br >
 AttackAngleBehaviour </br >
 PositionerBehaviour </br >
-ToolPriority </br >
 
 ### Utilities
 WindingClassConstructor </br >
+RotationAngleCalculator <br />
 SimulationCompiler </br >
 KRLCodeGenerator </br >
 E6PosGenerator </br >
-AxisAngleMonitor </br >
-SingularityMonitor </br >
+AxisMonitor </br >
 
 ### Objects
 WindingClass </br >
 
 ## Rhino and Grasshopper Files
-The latest version of the Rhino model and Grasshopper file can be found in Google Drive within the Fabrication folder of the current design phase.<br />
-[Fabrication Folder](https://drive.google.com/open?id=1-NvEibNWGSiWkUpBPFH5GkPmLzh_SPTq)
+The latest version of the Rhino model and Grasshopper file can be found in Google Drive within the Fabrication folder of the current design phase. [Fabrication Folder](https://drive.google.com/open?id=1-NvEibNWGSiWkUpBPFH5GkPmLzh_SPTq)
 
 ## Workflow
 In order to keep all the files organized and correctly updated please follow the suggested workflow:
