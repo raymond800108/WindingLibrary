@@ -73,18 +73,18 @@ namespace WindingLibrary
             }
 
         //  Determine whether Frame lies on corner condition
-            if (edgeIndex == 2 && tFinal > 0.95)
+            if (edgeIndex == 2 && tFinal > 0.99)
             {
                 edgeIndex = 3;
             }
-            else if (edgeIndex == 2 && tFinal < 0.05)
+            else if (edgeIndex == 2 && tFinal < 0.01)
             {
                 edgeIndex = 1;
-            }else if (edgeIndex == 0 && tFinal > 0.95)
+            }else if (edgeIndex == 0 && tFinal > 0.99)
             {
                 edgeIndex = 1;
             }
-            else if (edgeIndex == 0 && tFinal < 0.05)
+            else if (edgeIndex == 0 && tFinal < 0.01)
             {
                 edgeIndex = 3;
             }

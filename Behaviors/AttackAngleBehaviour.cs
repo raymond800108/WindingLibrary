@@ -89,15 +89,20 @@ public partial class WindingAttackAngle : GH_ScriptInstance
 
         if (wp.edgeIndex == 1)
         {
+            npln.Rotate(RhinoMath.ToRadians(180), npln.ZAxis);
             if (wp.edgeParam > 0.5)
             {
-                npln.Rotate(RhinoMath.ToRadians(110), npln.ZAxis);
-                npln.Rotate(RhinoMath.ToRadians(25), npln.XAxis);
+
+                npln.Rotate(RhinoMath.ToRadians(-105), npln.YAxis);
+                npln.Rotate(RhinoMath.ToRadians(-90), npln.ZAxis);
+
+
             }
             else
             {
-                npln.Rotate(RhinoMath.ToRadians(100), npln.ZAxis);
-                npln.Rotate(RhinoMath.ToRadians(15), npln.XAxis);
+                npln.Rotate(RhinoMath.ToRadians(-105), npln.YAxis);
+                npln.Rotate(RhinoMath.ToRadians(-90), npln.ZAxis);
+
             }
         }
         // Adjust these angles on edge 3! Very problematic at the moment

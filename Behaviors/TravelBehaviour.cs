@@ -166,7 +166,7 @@ public partial class TravelBehaviour : GH_ScriptInstance
             }
 
 
-            if (i < 4 || i > divisionCount-4)
+            if (i < 2 || i > divisionCount-4)
             {
 
             }

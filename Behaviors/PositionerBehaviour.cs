@@ -80,11 +80,11 @@ public partial class CustomAxisRotation : GH_ScriptInstance
             {
                 if (wp.edgeParam > 0.5)
                 {
-                    positionerAngles.Add(-235, pth);
+                    positionerAngles.Add(-215, pth);
                 }
                 else
                 {
-                    positionerAngles.Add(-220, pth);
+                    positionerAngles.Add(-185, pth);
                 }
             }
             else if (wp.edgeIndex == 2)
