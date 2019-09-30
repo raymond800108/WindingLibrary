@@ -69,33 +69,56 @@ public partial class CustomAxisRotation : GH_ScriptInstance
             {
                 if (wp.edgeParam > 0.5)
                 {
-                    positionerAngles.Add(-195, pth);
+                    positionerAngles.Add(-200, pth);
                 }
                 else
                 {
-                    positionerAngles.Add(-215, pth);
+                    positionerAngles.Add(-210, pth);
                 }
             }
             else if (wp.edgeIndex == 3)
             {
                 if (wp.edgeParam > 0.5)
                 {
-                    positionerAngles.Add(-215, pth);
+                    positionerAngles.Add(-225, pth);
                 }
                 else
                 {
-                    positionerAngles.Add(-185, pth);
+                    positionerAngles.Add(-205, pth);
                 }
             }
             else if (wp.edgeIndex == 2)
             {
-                positionerAngles.Add(-175, pth);
+                if (wp.edgeParam > 0.75)
+                {
+                    positionerAngles.Add(-195, pth);
+                }
+                else if (wp.edgeParam < 0.25)
+                {
+                    positionerAngles.Add(-205, pth);
+                }
+                else
+                {
+                    positionerAngles.Add(-190, pth);
+                }
 
 
             }
             else if (wp.edgeIndex == 0)
             {
-                positionerAngles.Add(-215, pth);
+                if (wp.edgeParam > 0.75)
+                {
+                    positionerAngles.Add(-195, pth);
+                }
+                else if(wp.edgeParam < 0.2)
+                {
+                    positionerAngles.Add(-230, pth);
+                }
+                else
+                {
+                    positionerAngles.Add(-185, pth);
+                }
+               
 
             }
 

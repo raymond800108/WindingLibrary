@@ -53,7 +53,7 @@ public partial class AxisAngleChecker : GH_ScriptInstance
     #endregion
 
 
-    private void RunScript(double A1, double A2, double A3, double A4, double A5, double A6, double E1_Rail, double E2_Positioner, bool iReset, ref object axis1Bool, ref object axis2Bool, ref object axis3Bool, ref object axis4Bool, ref object axis5Bool, ref object axis6Bool, ref object railAxisBool, ref object positionerAxisBool, ref object oErrorAxisColorIndex, ref object oSingularityAlert, ref object oSingularityCount, ref object oAxisProbCount)
+    private void RunScript(double A1, double A2, double A3, double A4, double A5, double A6, double E1_Rail, double E2_Positioner, double iTimestamp, bool iReset, ref object axis1Bool, ref object axis2Bool, ref object axis3Bool, ref object axis4Bool, ref object axis5Bool, ref object axis6Bool, ref object railAxisBool, ref object positionerAxisBool, ref object oErrorAxisColorIndex, ref object oSingularityAlert, ref object oSingularityCount, ref object oAxisProbCount, ref object oErrorLog)
 
     {
         // <Custom code>
@@ -69,6 +69,7 @@ public partial class AxisAngleChecker : GH_ScriptInstance
         {
             singularityCount = 0;
             axisProbCount = 0;
+            oProblemOutput.Clear();
         }
         // KUKA KR420 R3080
         // Color index: Axis1 ~ Axis6 = 0~5 , railAxis: 6 , positionerAxis: 7
@@ -90,6 +91,7 @@ public partial class AxisAngleChecker : GH_ScriptInstance
             axis1Bool = false;
             axisColorIndex.Add(0);
             axisProbCount++;
+            oProblemOutput.Add("T: " + iTimestamp + " E: Axis 1");
         }
 
         //Axis 2
@@ -102,6 +104,8 @@ public partial class AxisAngleChecker : GH_ScriptInstance
             axis2Bool = false;
             axisColorIndex.Add(1);
             axisProbCount++;
+            oProblemOutput.Add("T: " + iTimestamp + " E: Axis 2");
+
         }
 
         //Axis 3
@@ -113,6 +117,8 @@ public partial class AxisAngleChecker : GH_ScriptInstance
             {
                 SingularityAxisTest.Add("A6, A3, A2 almost coplanar: Elbow Singularity Alert");
                 singularityCount++;
+                oProblemOutput.Add("T: " + iTimestamp + " E: Elbow Singularity");
+
             }
         }
         else
@@ -120,6 +126,8 @@ public partial class AxisAngleChecker : GH_ScriptInstance
             axis3Bool = false;
             axisColorIndex.Add(2);
             axisProbCount++;
+            oProblemOutput.Add("T: " + iTimestamp + " E: Axis 3");
+
         }
 
         //Axis 4
@@ -132,6 +140,8 @@ public partial class AxisAngleChecker : GH_ScriptInstance
             axis4Bool = false;
             axisColorIndex.Add(3);
             axisProbCount++;
+            oProblemOutput.Add("T: " + iTimestamp + " E: Axis 4");
+
         }
 
         //Axis 5
@@ -142,6 +152,8 @@ public partial class AxisAngleChecker : GH_ScriptInstance
             {
                 SingularityAxisTest.Add("A6 align with A4: Wrist Singularity Alert");
                 singularityCount++;
+                oProblemOutput.Add("T: " + iTimestamp + " E: Wrist Axis Singularity");
+
             }
         }
         else
@@ -149,6 +161,7 @@ public partial class AxisAngleChecker : GH_ScriptInstance
             axis5Bool = false;
             axisColorIndex.Add(4);
             axisProbCount++;
+            oProblemOutput.Add("T: " + iTimestamp + " E: Axis 5");
         }
 
         //Axis 6
@@ -161,6 +174,8 @@ public partial class AxisAngleChecker : GH_ScriptInstance
             axis6Bool = false;
             axisColorIndex.Add(5);
             axisProbCount++;
+            oProblemOutput.Add("T: " + iTimestamp + " E: Axis 6");
+
         }
 
         //Rail Axis, Unit:meter(0.0~11.0), not quite sure the rail type and distance limitation
@@ -173,6 +188,8 @@ public partial class AxisAngleChecker : GH_ScriptInstance
             railAxisBool = false;
             axisColorIndex.Add(6);
             axisProbCount++;
+            oProblemOutput.Add("T: " + iTimestamp + " E: Rail Error");
+
         }
 
         //Positioner Axis
@@ -185,6 +202,8 @@ public partial class AxisAngleChecker : GH_ScriptInstance
             positionerAxisBool = false;
             axisColorIndex.Add(7);
             axisProbCount++;
+            oProblemOutput.Add("T: " + iTimestamp + " E: Positioner Error");
+
         }
 
         // Shoulder Singularity
@@ -193,17 +212,22 @@ public partial class AxisAngleChecker : GH_ScriptInstance
         {
             SingularityAxisTest.Add("A1 almost align with A6: Shoulder Singularity Alert");
             singularityCount++;
+            oProblemOutput.Add("T: " + iTimestamp + " E: Shoulder Singularity");
+
         }
 
         oErrorAxisColorIndex = axisColorIndex;
         oSingularityAlert = SingularityAxisTest;
         oSingularityCount = singularityCount;
         oAxisProbCount = axisProbCount;
+        oErrorLog = oProblemOutput;
+
         // </Custom code>
     }
 
     // <Custom additional code>
     int singularityCount = 0;
     int axisProbCount = 0;
+    List<string> oProblemOutput = new List<string>();
     // </Custom additional code>
 }

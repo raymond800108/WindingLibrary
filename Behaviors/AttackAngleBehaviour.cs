@@ -95,35 +95,23 @@ public partial class WindingAttackAngle : GH_ScriptInstance
 
                 npln.Rotate(RhinoMath.ToRadians(-105), npln.YAxis);
                 npln.Rotate(RhinoMath.ToRadians(-90), npln.ZAxis);
-
-
+                npln.Rotate(RhinoMath.ToRadians(-70), npln.XAxis);
             }
             else
             {
                 npln.Rotate(RhinoMath.ToRadians(-105), npln.YAxis);
                 npln.Rotate(RhinoMath.ToRadians(-90), npln.ZAxis);
-
+                npln.Rotate(RhinoMath.ToRadians(-70), npln.XAxis);
+                npln.Rotate(RhinoMath.ToRadians(60), npln.ZAxis);
             }
         }
-        // Adjust these angles on edge 3! Very problematic at the moment
+
         else if (wp.edgeIndex == 3)
         {
-            npln.Rotate(RhinoMath.ToRadians(15), npln.XAxis); // Rotate out
-            if (wp.edgeParam > 0.5)
-            {
-                npln.Rotate(RhinoMath.ToRadians(15), npln.ZAxis);
-                npln.Rotate(RhinoMath.ToRadians(5), npln.XAxis);
+            npln = new Plane(wp.basePlane);
+            npln.Rotate(RhinoMath.ToRadians(180), npln.XAxis);
 
-
-            }
-            else
-            {
-                npln.Rotate(RhinoMath.ToRadians(70), npln.ZAxis);
-                npln.Rotate(RhinoMath.ToRadians(55), npln.XAxis);
-
-
-            }
-
+            npln.Rotate(wp.edgeParam > 0.5 ? RhinoMath.ToRadians(50) : RhinoMath.ToRadians(70), npln.ZAxis);
         }
         else if(wp.edgeIndex == 2)
         {
@@ -131,37 +119,42 @@ public partial class WindingAttackAngle : GH_ScriptInstance
             npln.Rotate(RhinoMath.ToRadians(180), npln.YAxis);
             npln.Rotate(RhinoMath.ToRadians(-60), npln.XAxis);
 
-
-
-            if (wp.edgeParam > 0.5)
-            {
-                npln.Rotate(RhinoMath.ToRadians(25), npln.ZAxis);
-
-            }
-            else
-            {
-                npln.Rotate(RhinoMath.ToRadians(-25), npln.ZAxis);
-
-            }
-
+            npln.Rotate(wp.edgeParam > 0.5 ? RhinoMath.ToRadians(65) : RhinoMath.ToRadians(-35), npln.ZAxis);
         }
         else if (wp.edgeIndex == 0)
         {
             npln.Rotate(RhinoMath.ToRadians(90), npln.ZAxis);
             npln.Rotate(RhinoMath.ToRadians(-90), npln.XAxis);
-            if (wp.edgeParam > 0.5)
-            {
-                npln.Rotate(RhinoMath.ToRadians(-25), npln.ZAxis);
+            npln.Rotate(wp.edgeParam > 0.5 ? RhinoMath.ToRadians(-25) : RhinoMath.ToRadians(25), npln.ZAxis);
+        }
 
-            }
-            else
+        // Check for vertical pins and reorient
+        List<int> verticalPinsIds = new List<int>()
+        {
+            1,5,9,13,17,21,25,29,33,37   
+        };
+        if (wp.edgeIndex == 0)
+        {
+            bool isInList = verticalPinsIds.IndexOf(wp.pinIndex) != -1;
+            if (isInList)
             {
-                npln.Rotate(RhinoMath.ToRadians(25), npln.ZAxis);
+                //npln.Rotate(RhinoMath.ToRadians(-90), npln.XAxis);
+                //npln.Rotate(RhinoMath.ToRadians(180), npln.ZAxis);
+                wp.isVertical = true;
+            }
+        }
+        else if (wp.edgeIndex == 2)
+        {
+            bool isInList = verticalPinsIds.IndexOf(wp.pinIndex) != -1;
+            if (isInList)
+            {
+                // flip plane other way
+                wp.isVertical = true;
 
             }
         }
 
-            return npln;
+        return npln;
     }
     // </Custom additional code>
 }

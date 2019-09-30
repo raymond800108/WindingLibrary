@@ -93,7 +93,7 @@ public partial class TravelBehaviour : GH_ScriptInstance
         List<Plane> path = new List<Plane>();
 
         Point3d[] geoDiv;
-        int divisionCount = 20;
+        int divisionCount = 30;
         curve.DivideByCount(divisionCount, true, out geoDiv);
         curve.Domain = new Interval(0, 1);
         Point3d midPoint = axis.PointAt(0.55);
@@ -116,62 +116,76 @@ public partial class TravelBehaviour : GH_ScriptInstance
             rpln.Origin -= vec;
 
             // If is back syntax add vector that attracts the planes towards the middle
-            if (isBackSyntax)
-            {
+            //if (isBackSyntax || rpln.Origin.Y > 2000)
+            //{
+            //    Vector3d toMid = nextWC.basePlane.Origin - midPoint;
+            //    Vector3d toMidNoZ = new Vector3d(toMid.X, toMid.Y, 0);
 
-                Vector3d toMid = nextWC.basePlane.Origin - midPoint;
-                Vector3d toMidNoZ = new Vector3d(toMid.X, toMid.Y, 0);
+            //    Vector3d toMidCurrent = wC.basePlane.Origin - midPoint;
+            //    Vector3d toMidNoZCurrent = new Vector3d(toMidCurrent.X, toMidCurrent.Y, 0);
 
-                Vector3d toMidCurrent = wC.basePlane.Origin - midPoint;
-                Vector3d toMidNoZCurrent = new Vector3d(toMidCurrent.X, toMidCurrent.Y, 0);
+            //    Vector3d localToMid = rpln.Origin - midPoint;
+            //    Vector3d localToMidNoZ = new Vector3d(localToMid.X, localToMid.Y, 0);
 
-
-                Vector3d localToMid = rpln.Origin - midPoint;
-                Vector3d localToMidNoZ = new Vector3d(localToMid.X, localToMid.Y, 0);
-
-                if (toMidNoZ.Length >= 1000)
-                {
-                    if (toMidNoZCurrent.Length >= 1000 && wC.edgeIndex != nextWC.edgeIndex)
-                    {
-                        localToMidNoZ += Vector3d.ZAxis*-400;
-                        rpln.Origin -= localToMidNoZ * 0.75;
-                    }
-                    else if(wC.edgeIndex != nextWC.edgeIndex)
-                    {
-                        rpln.Origin -= localToMidNoZ * 0.5;
-                    }
-                }
-                else
-                {
-                    rpln.Origin -= toMidNoZ * 0.3;
-                }
+            //    if (toMidNoZ.Length >= 1000)
+            //    {
+            //        if (toMidNoZCurrent.Length >= 1000 && wC.edgeIndex != nextWC.edgeIndex)
+            //        {
+            //            localToMidNoZ += Vector3d.ZAxis*-400;
+            //            rpln.Origin -= localToMidNoZ * 0.75;
+            //        }
+            //        else if(wC.edgeIndex != nextWC.edgeIndex)
+            //        {
+            //            rpln.Origin -= localToMidNoZ * 0.5;
+            //        }
+            //    }
+            //    else
+            //    {
+            //        rpln.Origin -= toMidNoZ * 0.3;
+            //    }
                 
-            }
+            //}
+
+
 
             Plane xyPlane = Plane.WorldXY;
             xyPlane.Origin = rpln.Origin;
+            double distance = wC.basePlane.Origin.DistanceTo(nextWC.basePlane.Origin);
             xyPlane.Rotate(RhinoMath.ToRadians(180), xyPlane.XAxis, xyPlane.Origin);
             xyPlane.Rotate(RhinoMath.ToRadians(-15), xyPlane.YAxis, xyPlane.Origin);
 
             // Rotate plane so robot is pulling fiber, reduces friction
+
             if (nextWC.basePlane.Origin.Y > wC.basePlane.Origin.Y)
             {
-                Transform tf3 = Transform.Rotation(RhinoMath.ToRadians(-45), xyPlane.XAxis, xyPlane.Origin);
-                xyPlane.Transform(tf3);
+
+                xyPlane.Rotate(RhinoMath.ToRadians(-45), xyPlane.XAxis, xyPlane.Origin);
+                if (xyPlane.Origin.Y > 2000)
+                {
+                    xyPlane.Rotate(RhinoMath.ToRadians(45), xyPlane.YAxis, xyPlane.Origin);
+                }
+                if (xyPlane.Origin.Y < -2000)
+                {
+                    xyPlane.Rotate(RhinoMath.ToRadians(95), xyPlane.YAxis, xyPlane.Origin);
+                }
             }
             else
             {
-                Transform tf3 = Transform.Rotation(RhinoMath.ToRadians(45), xyPlane.XAxis, xyPlane.Origin);
-                xyPlane.Transform(tf3);
+                xyPlane.Rotate(RhinoMath.ToRadians(45), xyPlane.XAxis, xyPlane.Origin);
+                if (xyPlane.Origin.Y < -2000)
+                {
+                    xyPlane.Rotate(RhinoMath.ToRadians(55), xyPlane.YAxis, xyPlane.Origin);
+                }
+                
             }
-
-
-            if (i < 2 || i > divisionCount-4)
+           
+            if (i < 6 || i > divisionCount-6)
             {
 
             }
             else
             {
+                
                 path.Add(xyPlane);
             }
 

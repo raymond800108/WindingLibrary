@@ -17,6 +17,7 @@ namespace WindingLibrary
     public class WindingClass
     {
         public int index;
+        public int pinIndex;
         public Plane basePlane;
         public int edgeIndex;
         public double edgeParam;
@@ -24,6 +25,7 @@ namespace WindingLibrary
         public Surface srf;
         public NurbsCurve edgeCurve;
         public Plane attackAngle;
+        public bool isVertical = false;
 
         public List<Plane> windingPath = new List<Plane>();
         public List<Plane> travelPath = new List<Plane>();
@@ -32,14 +34,14 @@ namespace WindingLibrary
         
 
 
-        public WindingClass(Polyline poly, int _index, Surface _srf)
+        public WindingClass(Polyline poly, int _index, Surface _srf, bool isBackSyntax)
         {
             index = _index;
             srf = _srf;
-            Frame(poly[index]);
+            Frame(poly[index], isBackSyntax);
         }
 
-        void Frame(Point3d pt)
+        void Frame(Point3d pt, bool isBackSyntax)
         {
 
         //  Find Plane Based on Surface
@@ -72,22 +74,46 @@ namespace WindingLibrary
                 }
             }
 
-        //  Determine whether Frame lies on corner condition
-            if (edgeIndex == 2 && tFinal > 0.99)
+            //  Determine whether Frame lies on corner condition
+            if (isBackSyntax)
             {
-                edgeIndex = 3;
+                if (edgeIndex == 1 && tFinal > 0.99)
+                {
+                    edgeIndex = 2;
+                }
+                else if (edgeIndex == 1 && tFinal < 0.01)
+                {
+                    edgeIndex = 0;
+                }
+                else if (edgeIndex == 3 && tFinal > 0.99)
+                {
+                    edgeIndex = 0;
+                }
+                else if (edgeIndex == 3 && tFinal < 0.01)
+                {
+                    edgeIndex = 2;
+                }
             }
-            else if (edgeIndex == 2 && tFinal < 0.01)
+            else
             {
-                edgeIndex = 1;
-            }else if (edgeIndex == 0 && tFinal > 0.99)
-            {
-                edgeIndex = 1;
+                if (edgeIndex == 2 && tFinal > 0.99)
+                {
+                    edgeIndex = 3;
+                }
+                else if (edgeIndex == 2 && tFinal < 0.01)
+                {
+                    edgeIndex = 1;
+                }
+                else if (edgeIndex == 0 && tFinal > 0.99)
+                {
+                    edgeIndex = 1;
+                }
+                else if (edgeIndex == 0 && tFinal < 0.01)
+                {
+                    edgeIndex = 3;
+                }
             }
-            else if (edgeIndex == 0 && tFinal < 0.01)
-            {
-                edgeIndex = 3;
-            }
+          
 
         //  Save location of plane on edge, and edge geometry
             surfaceEdges[edgeIndex].Domain = new Interval(0, 1);

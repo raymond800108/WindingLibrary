@@ -53,18 +53,24 @@ public partial class WindingBehaviour : GH_ScriptInstance
     #endregion
 
 
-    private void RunScript(List<System.Object> iWindingObjects, Interval iHeight, Interval iWidth, Interval iLength, ref object oWindingPoints, ref object oWrap, ref object oNoWrap)
+    private void RunScript(List<System.Object> iWindingObjects, Curve iWindingPolyline, ref object oWindingPoints, ref object oWrap, ref object oNoWrap)
     {
         // <Custom code>
         DataTree<Plane> wrap = new DataTree<Plane>();
         DataTree<Plane> noWrap = new DataTree<Plane>();
-
         List<WindingClass> windingObjects = new List<WindingClass>();
+
+        BoundingBox polylineBox = iWindingPolyline.GetBoundingBox(true); //G
+        Plane polyBasePlane = new Plane(polylineBox.PointAt(0.5, 0.5, 0), new Vector3d(0, 0, -1)); //G
+
         for (var index = 0; index < iWindingObjects.Count; index++)
         {
             GH_Path pth = new GH_Path(index);
             WindingClass wC = (WindingClass)iWindingObjects[index];
-            wC.windingPath = CreateWindingPath(wC, iWidth, iHeight, iLength);
+
+            //wC.windingPath = CreateWindingPath(wC, iWidth, iHeight, iLength);
+            int loopDir = CheckWindingSide(iWindingObjects, index);
+            wC.windingPath = CreateWindingPath2(wC, iWindingPolyline, polyBasePlane, loopDir);
             wrap.AddRange(wC.windingPath, pth);
             noWrap.Add(wC.attackAngle, pth);
             windingObjects.Add(wC);
@@ -78,77 +84,60 @@ public partial class WindingBehaviour : GH_ScriptInstance
     }
 
     // <Custom additional code>
-    List<Plane> CreateWindingPath(WindingClass wC, Interval width, Interval height, Interval length)
+  
+    int CheckWindingSide(List<object> windingObjects, int i)
     {
-        List<Plane> behav = new List<Plane>();
-        Plane pln = wC.attackAngle;
+        // 0 - clockwise ; 1 - counter clockwise
 
-        if (wC.edgeIndex == 0 || wC.edgeIndex == 2)
-        {
-            pln.Rotate(RhinoMath.ToRadians(-180), pln.XAxis);
-        }
+        if (i == 0 || i == windingObjects.Count - 1) return 0; // knot
         else
         {
-            pln.Rotate(RhinoMath.ToRadians(180), pln.XAxis);
+            double p1y = ((WindingClass)windingObjects[i - 1]).attackAngle.Origin.Y;
+            double p2y = ((WindingClass)windingObjects[i + 1]).attackAngle.Origin.Y;
+            if (p1y <= p2y) return 1;
+            else return 0;
+        }
+    }
+
+    List<Plane> CreateWindingPath2(WindingClass wC, Curve windingPolyline, Plane polyBasePlane, int loopDirection)
+    {
+        List<Plane> behav = new List<Plane>();
+        List<Point3d> corners = new List<Point3d>();
+
+        Curve polylineToCopy = windingPolyline.DuplicateCurve();
+        Transform tr = Transform.PlaneToPlane(polyBasePlane, wC.attackAngle);
+        polylineToCopy.Transform(tr);
+
+        // mirror the polyline if loopDirection is counter clockwise - 1 
+        if (loopDirection == 1)
+        {
+            Plane mirrorPlane = wC.basePlane;
+            if (wC.edgeIndex == 0 || wC.edgeIndex == 2) // side edges
+            {
+                mirrorPlane.Rotate(RhinoMath.ToRadians(90), mirrorPlane.YAxis);
+            }
+            else if (wC.edgeIndex == 1 || wC.edgeIndex == 3)
+            {
+                mirrorPlane.Rotate(RhinoMath.ToRadians(90), mirrorPlane.XAxis);
+            }
+
+            Transform mirrTr = Transform.Mirror(mirrorPlane);
+            polylineToCopy.Transform(mirrTr);
         }
 
-        // Create Box
-        Brep box = Brep.CreateFromBox(new Box(pln,
-            new BoundingBox(width.Min, length.Min, height.Min, width.Max, length.Max, height.Max)));
-        List<Point3d> corners = new List<Point3d>()
+
+        Curve[] seg = polylineToCopy.DuplicateSegments();
+        Print(seg.Length.ToString());
+        for (int i = 0; i < seg.Length; i++)
         {
-            box.Vertices[5].Location,
-            box.Vertices[6].Location,
-            box.Vertices[7].Location,
-            box.Vertices[0].Location,
-            box.Vertices[1].Location,
-            box.Vertices[2].Location,
-            box.Vertices[3].Location,
-            box.Vertices[4].Location,
+            seg[i].Domain = new Interval(0, 1);
+            corners.Add(seg[i].PointAt(0));
+            if (i == (seg.Length - 1))
+            {
+                corners.Add(seg[i].PointAt(1));
+            }
+        }
 
-        };
-        //for (int i = 0; i < box.Vertices.Count; i++)
-        //{
-        //    corners.Add(box.Vertices[i].Location);
-        //}
-
-
-        // Back of frame motion value
-        //int backHook = 20;
-        //Point3d movedCorner2 = corners[2];
-        //movedCorner2 += (corners[5] - corners[1]) * backHook;
-
-        //Point3d movedCorner3 = corners[3];
-        //movedCorner3 += (corners[5] - corners[1]) * backHook;
-
-        //Point3d movedCorner4 = corners[4];
-
-        //// LOL same code in if else comeon
-        //if (wC.edgeIndex == 0 || wC.edgeIndex == 2)
-        //{
-        //    movedCorner2 += (corners[5] - corners[1]) * -1 * backHook;
-        //    movedCorner4 += (corners[1] - corners[2]) * -2 * backHook;
-        //}
-        //else
-        //{
-        //    movedCorner2 += (corners[5] - corners[1]) * -1 * backHook;
-        //    movedCorner4 += (corners[1] - corners[2]) * -2 * backHook;
-        //}
-
-        //List<Point3d> selC = new List<Point3d>()
-        //{
-        //    corners[4],
-        //    corners[0],
-        //    corners[3],
-        //    movedCorner3,
-        //    movedCorner2,
-        //    corners[2],
-        //    corners[1],
-        //    movedCorner4
-        //};
-        PolylineCurve polyC = new PolylineCurve(corners);
-
-        // Box
         for (int i = 0; i < corners.Count; i++)
         {
             Plane pla = wC.attackAngle;
@@ -157,7 +146,7 @@ public partial class WindingBehaviour : GH_ScriptInstance
         }
 
         return behav;
-
     }
+
     // </Custom additional code>
 }

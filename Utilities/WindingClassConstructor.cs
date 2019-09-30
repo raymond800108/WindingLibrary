@@ -53,7 +53,7 @@ public partial class WindingClassConstructor : GH_ScriptInstance
     #endregion
 
 
-    private void RunScript(Polyline iPolyline, Surface iSrf, ref object oIsoCurves, ref object oWindingObjects, ref object oPlanes)
+    private void RunScript(Polyline iPolyline, Surface iSrf, DataTree<Point3d> iAnchors, bool isBackSyntax, ref object oIsoCurves, ref object oWindingObjects, ref object oPlanes)
 
     {
         // <Custom code>
@@ -64,14 +64,16 @@ public partial class WindingClassConstructor : GH_ScriptInstance
         
         for (int i = 0; i < iPolyline.Count; i++)
         {
-            WindingClass tempWC = new WindingClass(iPolyline, i, iSrf);
+            WindingClass tempWC = new WindingClass(iPolyline, i, iSrf, isBackSyntax);
             windingPoints.Add(tempWC);
+            IdentifyPinIndexes(tempWC, iAnchors);
         }
 
         foreach (WindingClass wC in windingPoints)
         {
             windingPlanes.Add(wC.basePlane);
             isoCurves.Add(wC.iso);
+
             Print(wC.edgeIndex.ToString());
         }
 
@@ -83,6 +85,22 @@ public partial class WindingClassConstructor : GH_ScriptInstance
     }
 
     // <Custom additional code>
-   
+    public void IdentifyPinIndexes(WindingClass wC, DataTree<Point3d> anchors)
+    {
+        // Find pin index 
+
+        double minDistancePin = double.MaxValue;
+        for (var i = 0; i < anchors.Branch(wC.edgeIndex).Count; i++)
+        {
+            Point3d pt = wC.basePlane.Origin;
+            double distancePin = pt.DistanceTo(anchors.Branch(wC.edgeIndex)[i]);
+            if (distancePin < minDistancePin)
+            {
+                minDistancePin = distancePin;
+                wC.pinIndex = i;
+            }
+        }
+
+    }
     // </Custom additional code>
 }
