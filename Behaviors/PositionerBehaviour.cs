@@ -69,7 +69,7 @@ public partial class CustomAxisRotation : GH_ScriptInstance
             {
                 if (wp.edgeParam > 0.5)
                 {
-                    positionerAngles.Add(-200, pth);
+                    positionerAngles.Add(-190, pth);
                 }
                 else
                 {
@@ -80,7 +80,7 @@ public partial class CustomAxisRotation : GH_ScriptInstance
             {
                 if (wp.edgeParam > 0.5)
                 {
-                    positionerAngles.Add(-225, pth);
+                    positionerAngles.Add(-245, pth);
                 }
                 else
                 {
@@ -89,7 +89,7 @@ public partial class CustomAxisRotation : GH_ScriptInstance
             }
             else if (wp.edgeIndex == 2)
             {
-                if (wp.edgeParam > 0.75)
+                if (wp.edgeParam > 0.65)
                 {
                     positionerAngles.Add(-195, pth);
                 }
@@ -99,27 +99,26 @@ public partial class CustomAxisRotation : GH_ScriptInstance
                 }
                 else
                 {
-                    positionerAngles.Add(-190, pth);
+                    positionerAngles.Add(-185, pth);
                 }
 
 
             }
             else if (wp.edgeIndex == 0)
             {
+                
                 if (wp.edgeParam > 0.75)
                 {
-                    positionerAngles.Add(-195, pth);
+                    positionerAngles.Add(-205, pth);
                 }
                 else if(wp.edgeParam < 0.2)
                 {
-                    positionerAngles.Add(-230, pth);
+                    positionerAngles.Add(-220, pth);
                 }
                 else
                 {
-                    positionerAngles.Add(-185, pth);
+                    positionerAngles.Add(-195, pth);
                 }
-               
-
             }
 
         }

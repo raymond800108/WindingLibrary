@@ -72,6 +72,7 @@ public partial class TravelBehaviour : GH_ScriptInstance
             travelPlanes.AddRange(wC.travelPath, pth);
             allPlanes.AddRange(wC.windingPath, pth);
             allPlanes.AddRange(wC.travelPath, pth);
+            //allPlanes.AddRange(wC.transitionPath);
             windingObjects.Add(wC);
         }
 
@@ -95,6 +96,7 @@ public partial class TravelBehaviour : GH_ScriptInstance
         Point3d[] geoDiv;
         int divisionCount = 30;
         curve.DivideByCount(divisionCount, true, out geoDiv);
+        //curve.DivideByLength(50, true, out geoDiv);
         curve.Domain = new Interval(0, 1);
         Point3d midPoint = axis.PointAt(0.55);
 
@@ -112,39 +114,44 @@ public partial class TravelBehaviour : GH_ScriptInstance
             // Offset plane from surface
             Vector3d V = rpln.ZAxis;
             V.Unitize();
+            
             Vector3d vec = V * VecAmp;
             rpln.Origin -= vec;
+           
+            
 
             // If is back syntax add vector that attracts the planes towards the middle
-            //if (isBackSyntax || rpln.Origin.Y > 2000)
-            //{
-            //    Vector3d toMid = nextWC.basePlane.Origin - midPoint;
-            //    Vector3d toMidNoZ = new Vector3d(toMid.X, toMid.Y, 0);
 
-            //    Vector3d toMidCurrent = wC.basePlane.Origin - midPoint;
-            //    Vector3d toMidNoZCurrent = new Vector3d(toMidCurrent.X, toMidCurrent.Y, 0);
+            if (true)
 
-            //    Vector3d localToMid = rpln.Origin - midPoint;
-            //    Vector3d localToMidNoZ = new Vector3d(localToMid.X, localToMid.Y, 0);
+            {
+                Vector3d toMid = nextWC.basePlane.Origin - midPoint;
+                Vector3d toMidNoZ = new Vector3d(toMid.X, toMid.Y, 0);
 
-            //    if (toMidNoZ.Length >= 1000)
-            //    {
-            //        if (toMidNoZCurrent.Length >= 1000 && wC.edgeIndex != nextWC.edgeIndex)
-            //        {
-            //            localToMidNoZ += Vector3d.ZAxis*-400;
-            //            rpln.Origin -= localToMidNoZ * 0.75;
-            //        }
-            //        else if(wC.edgeIndex != nextWC.edgeIndex)
-            //        {
-            //            rpln.Origin -= localToMidNoZ * 0.5;
-            //        }
-            //    }
-            //    else
-            //    {
-            //        rpln.Origin -= toMidNoZ * 0.3;
-            //    }
-                
-            //}
+                Vector3d toMidCurrent = wC.basePlane.Origin - midPoint;
+                Vector3d toMidNoZCurrent = new Vector3d(toMidCurrent.X, toMidCurrent.Y, 0);
+
+                Vector3d localToMid = rpln.Origin - midPoint;
+                Vector3d localToMidNoZ = new Vector3d(localToMid.X, localToMid.Y, 0);
+
+                if (toMidNoZ.Length >= 1900)
+                {
+                    if (toMidNoZCurrent.Length >= 1900 && wC.edgeIndex != nextWC.edgeIndex)
+                    {
+                        localToMidNoZ += Vector3d.ZAxis * -100;
+                        rpln.Origin -= localToMidNoZ * 0.15;
+                    }
+                    else if (wC.edgeIndex != nextWC.edgeIndex)
+                    {
+                        rpln.Origin -= localToMidNoZ * 0.05;
+                    }
+                }
+                else
+                {
+                    //rpln.Origin -= toMidNoZ * 0.1;
+                }
+
+            }
 
 
 
@@ -160,26 +167,62 @@ public partial class TravelBehaviour : GH_ScriptInstance
             {
 
                 xyPlane.Rotate(RhinoMath.ToRadians(-45), xyPlane.XAxis, xyPlane.Origin);
-                if (xyPlane.Origin.Y > 2000)
+                if (xyPlane.Origin.Y > 1500)
                 {
-                    xyPlane.Rotate(RhinoMath.ToRadians(45), xyPlane.YAxis, xyPlane.Origin);
+                    //xyPlane.Rotate(RhinoMath.ToRadians(45), xyPlane.YAxis, xyPlane.Origin);
+                    if (nextWC.edgeIndex == 0)
+                    {
+                        xyPlane.Rotate(RhinoMath.ToRadians(45), xyPlane.YAxis, xyPlane.Origin);
+                    }
+                    else if (nextWC.edgeIndex == 2)
+                    {
+                        xyPlane.Rotate(RhinoMath.ToRadians(-15), xyPlane.XAxis, xyPlane.Origin);
+                        xyPlane.Rotate(RhinoMath.ToRadians(30), xyPlane.YAxis, xyPlane.Origin);
+                    }
+                    else
+                    {
+                        xyPlane.Rotate(RhinoMath.ToRadians(45), xyPlane.YAxis, xyPlane.Origin);
+                    }
                 }
-                if (xyPlane.Origin.Y < -2000)
+                else if (xyPlane.Origin.Y < -1500)
                 {
                     xyPlane.Rotate(RhinoMath.ToRadians(95), xyPlane.YAxis, xyPlane.Origin);
+
                 }
             }
             else
             {
                 xyPlane.Rotate(RhinoMath.ToRadians(45), xyPlane.XAxis, xyPlane.Origin);
-                if (xyPlane.Origin.Y < -2000)
+                if (xyPlane.Origin.Y < -1500)
                 {
-                    xyPlane.Rotate(RhinoMath.ToRadians(55), xyPlane.YAxis, xyPlane.Origin);
+
+                    if (nextWC.edgeIndex == 0)
+                    {
+                        xyPlane.Rotate(RhinoMath.ToRadians(60), xyPlane.YAxis, xyPlane.Origin);
+                        xyPlane.Rotate(RhinoMath.ToRadians(0), xyPlane.XAxis, xyPlane.Origin);
+
+                    }
+                    else if (nextWC.edgeIndex == 2)
+                    {
+
+                        //xyPlane.Rotate(RhinoMath.ToRadians(30), xyPlane.YAxis, xyPlane.Origin);
+                        xyPlane.Rotate(RhinoMath.ToRadians(75), xyPlane.YAxis, xyPlane.Origin);
+                        //xyPlane.Rotate(RhinoMath.ToRadians(40), xyPlane.ZAxis, xyPlane.Origin);
+                    }
+                    else
+                    {
+                        xyPlane.Rotate(RhinoMath.ToRadians(55), xyPlane.YAxis, xyPlane.Origin);
+
+                    }
                 }
-                
+                else if (xyPlane.Origin.Y > 1900)
+                {
+                    //xyPlane.Rotate(RhinoMath.ToRadians(65), xyPlane.YAxis, xyPlane.Origin);
+                }
+
             }
-           
-            if (i < 6 || i > divisionCount-6)
+
+            if (i < 0 || i > divisionCount-0)
             {
 
             }

@@ -18,17 +18,24 @@ namespace WindingLibrary
     {
         public int index;
         public int pinIndex;
+        public bool isVertical = false;
+
         public Plane basePlane;
+        public Plane attackAngle;
+        public Plane windingCurvePlane;
+
         public int edgeIndex;
         public double edgeParam;
+        public NurbsCurve edgeCurve;
+
         public Curve iso;
         public Surface srf;
-        public NurbsCurve edgeCurve;
-        public Plane attackAngle;
-        public bool isVertical = false;
 
         public List<Plane> windingPath = new List<Plane>();
         public List<Plane> travelPath = new List<Plane>();
+        public List<Plane> transitionPath = new List<Plane>();
+
+        // Deprecated?
         public int frameside;
         public double ft;
         
@@ -75,44 +82,25 @@ namespace WindingLibrary
             }
 
             //  Determine whether Frame lies on corner condition
-            if (isBackSyntax)
+
+            if (edgeIndex == 1 && tFinal > 0.99)
             {
-                if (edgeIndex == 1 && tFinal > 0.99)
-                {
-                    edgeIndex = 2;
-                }
-                else if (edgeIndex == 1 && tFinal < 0.01)
-                {
-                    edgeIndex = 0;
-                }
-                else if (edgeIndex == 3 && tFinal > 0.99)
-                {
-                    edgeIndex = 0;
-                }
-                else if (edgeIndex == 3 && tFinal < 0.01)
-                {
-                    edgeIndex = 2;
-                }
+                edgeIndex = 2;
             }
-            else
+            else if (edgeIndex == 1 && tFinal < 0.01)
             {
-                if (edgeIndex == 2 && tFinal > 0.99)
-                {
-                    edgeIndex = 3;
-                }
-                else if (edgeIndex == 2 && tFinal < 0.01)
-                {
-                    edgeIndex = 1;
-                }
-                else if (edgeIndex == 0 && tFinal > 0.99)
-                {
-                    edgeIndex = 1;
-                }
-                else if (edgeIndex == 0 && tFinal < 0.01)
-                {
-                    edgeIndex = 3;
-                }
+                edgeIndex = 0;
             }
+            else if (edgeIndex == 3 && tFinal > 0.99)
+            {
+                edgeIndex = 0;
+            }
+            else if (edgeIndex == 3 && tFinal < 0.01)
+            {
+                edgeIndex = 2;
+            }
+            
+            
           
 
         //  Save location of plane on edge, and edge geometry

@@ -61,16 +61,20 @@ public partial class WindingBehaviour : GH_ScriptInstance
         List<WindingClass> windingObjects = new List<WindingClass>();
 
         BoundingBox polylineBox = iWindingPolyline.GetBoundingBox(true); //G
-        Plane polyBasePlane = new Plane(polylineBox.PointAt(0.5, 0.5, 0), new Vector3d(0, 0, -1)); //G
+
+        Plane polyBasePlane = new Plane(polylineBox.PointAt(0.5, 0.5, 0.6), new Vector3d(0, 0, -1)); //G
 
         for (var index = 0; index < iWindingObjects.Count; index++)
         {
             GH_Path pth = new GH_Path(index);
             WindingClass wC = (WindingClass)iWindingObjects[index];
 
-            //wC.windingPath = CreateWindingPath(wC, iWidth, iHeight, iLength);
             int loopDir = CheckWindingSide(iWindingObjects, index);
-            wC.windingPath = CreateWindingPath2(wC, iWindingPolyline, polyBasePlane, loopDir);
+            wC.windingPath = CreateWindingPath(wC, iWindingPolyline, polyBasePlane, loopDir);
+            wC.transitionPath = GenerateTransitionPath(wC);
+
+            //wrap.AddRange(wC.transitionPath, pth);
+
             wrap.AddRange(wC.windingPath, pth);
             noWrap.Add(wC.attackAngle, pth);
             windingObjects.Add(wC);
@@ -99,33 +103,34 @@ public partial class WindingBehaviour : GH_ScriptInstance
         }
     }
 
-    List<Plane> CreateWindingPath2(WindingClass wC, Curve windingPolyline, Plane polyBasePlane, int loopDirection)
+    List<Plane> CreateWindingPath(WindingClass wC, Curve windingPolyline, Plane polyBasePlane, int loopDirection)
     {
         List<Plane> behav = new List<Plane>();
         List<Point3d> corners = new List<Point3d>();
 
         Curve polylineToCopy = windingPolyline.DuplicateCurve();
-        Transform tr = Transform.PlaneToPlane(polyBasePlane, wC.attackAngle);
+
+        wC.windingCurvePlane = GenerateTempPlane(wC);
+        Transform tr = Transform.PlaneToPlane(polyBasePlane, wC.windingCurvePlane);
+
         polylineToCopy.Transform(tr);
 
-        // mirror the polyline if loopDirection is counter clockwise - 1 
+        //  Mirror the Polyline if loopDirection is counter clockwise - 1
         if (loopDirection == 1)
         {
-            Plane mirrorPlane = wC.basePlane;
-            if (wC.edgeIndex == 0 || wC.edgeIndex == 2) // side edges
+            Plane mirrorPlane = wC.windingCurvePlane;
+            if (wC.edgeIndex == 0 || wC.edgeIndex == 2)
             {
                 mirrorPlane.Rotate(RhinoMath.ToRadians(90), mirrorPlane.YAxis);
             }
             else if (wC.edgeIndex == 1 || wC.edgeIndex == 3)
             {
-                mirrorPlane.Rotate(RhinoMath.ToRadians(90), mirrorPlane.XAxis);
+                mirrorPlane.Rotate(RhinoMath.ToRadians(90), mirrorPlane.YAxis);
             }
 
             Transform mirrTr = Transform.Mirror(mirrorPlane);
             polylineToCopy.Transform(mirrTr);
         }
-
-
         Curve[] seg = polylineToCopy.DuplicateSegments();
         Print(seg.Length.ToString());
         for (int i = 0; i < seg.Length; i++)
@@ -144,8 +149,69 @@ public partial class WindingBehaviour : GH_ScriptInstance
             pla.Origin = corners[i];
             behav.Add(pla);
         }
+        behav.AddRange(GenerateTransitionPath(wC));
 
         return behav;
+    }
+
+    private static List<Plane> GenerateTransitionPath(WindingClass wC)
+    {
+        List<Plane> transitionPathPlanes = new List<Plane>();
+        Plane transitionPlane = new Plane(wC.attackAngle);
+
+        if (wC.edgeIndex == 0 || wC.edgeIndex == 2)
+        {
+            Transform trf = Transform.Translation(wC.windingCurvePlane.ZAxis*-150);
+            transitionPlane.Transform(trf);
+            transitionPathPlanes.Add(transitionPlane);
+        }
+        return transitionPathPlanes;
+    }
+
+    private static Plane GenerateTempPlane(WindingClass wC)
+    {
+        Plane tempPlane;
+        if (wC.isVertical)
+        {
+            tempPlane = wC.basePlane;
+            Transform downTrf = Transform.Translation(new Vector3d(tempPlane.ZAxis) * 135);
+            tempPlane.Transform(downTrf);
+            if (wC.edgeIndex == 0)
+            {
+                tempPlane.Rotate(RhinoMath.ToRadians(90), tempPlane.XAxis, tempPlane.Origin);
+            }
+            else
+            {
+                tempPlane.Rotate(RhinoMath.ToRadians(-90), tempPlane.XAxis, tempPlane.Origin);
+            }
+        }
+        else
+        {
+            tempPlane = wC.basePlane;
+            tempPlane.Rotate(RhinoMath.ToRadians(180), tempPlane.XAxis, tempPlane.Origin);
+        }
+
+
+        if (wC.edgeIndex == 2)
+        {
+            tempPlane.Rotate(RhinoMath.ToRadians(180), tempPlane.ZAxis);
+            tempPlane.Rotate(RhinoMath.ToRadians(20), tempPlane.XAxis);
+        }
+        else if (wC.edgeIndex == 3)
+        {
+            tempPlane.Rotate(RhinoMath.ToRadians(90), tempPlane.ZAxis);
+        }
+        else if (wC.edgeIndex == 1)
+        {
+            tempPlane.Rotate(RhinoMath.ToRadians(-90), tempPlane.ZAxis);
+            tempPlane.Rotate(RhinoMath.ToRadians(-5), tempPlane.XAxis);
+        }
+        else
+        {
+            tempPlane.Rotate(RhinoMath.ToRadians(20), tempPlane.XAxis);
+        }
+
+        return tempPlane;
     }
 
     // </Custom additional code>

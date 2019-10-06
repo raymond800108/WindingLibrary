@@ -117,9 +117,22 @@ public partial class WindingAttackAngle : GH_ScriptInstance
         {
             npln.Rotate(RhinoMath.ToRadians(90), npln.ZAxis);
             npln.Rotate(RhinoMath.ToRadians(180), npln.YAxis);
-            npln.Rotate(RhinoMath.ToRadians(-60), npln.XAxis);
+            npln.Rotate(RhinoMath.ToRadians(-80), npln.XAxis);
+            if (wp.edgeParam < 0.25)
+            {
+                npln.Rotate(RhinoMath.ToRadians(-60), npln.ZAxis);
+            }
+            else if (wp.edgeParam < 0.5)
+            {
+                npln.Rotate(RhinoMath.ToRadians(-25), npln.ZAxis);
 
-            npln.Rotate(wp.edgeParam > 0.5 ? RhinoMath.ToRadians(65) : RhinoMath.ToRadians(-35), npln.ZAxis);
+            }
+            else if (wp.edgeParam > 0.5)
+            {
+                npln.Rotate(RhinoMath.ToRadians(35), npln.ZAxis);
+                npln.Rotate(RhinoMath.ToRadians(15), npln.XAxis);
+            }
+            //npln.Rotate(wp.edgeParam > 0.5 ? RhinoMath.ToRadians(65) : RhinoMath.ToRadians(-15), npln.ZAxis);
         }
         else if (wp.edgeIndex == 0)
         {
@@ -131,15 +144,39 @@ public partial class WindingAttackAngle : GH_ScriptInstance
         // Check for vertical pins and reorient
         List<int> verticalPinsIds = new List<int>()
         {
-            1,5,9,13,17,21,25,29,33,37   
+            2,6,10,14,18,22,26,30,34,38   
         };
         if (wp.edgeIndex == 0)
         {
             bool isInList = verticalPinsIds.IndexOf(wp.pinIndex) != -1;
             if (isInList)
             {
-                //npln.Rotate(RhinoMath.ToRadians(-90), npln.XAxis);
+                //npln.Rotate(RhinoMath.ToRadians(-110), npln.XAxis);
                 //npln.Rotate(RhinoMath.ToRadians(180), npln.ZAxis);
+                //if (wp.edgeParam < 0.3)
+                //{
+                //    npln.Rotate(RhinoMath.ToRadians(-45), npln.ZAxis);
+                //    npln.Rotate(RhinoMath.ToRadians(-40), npln.YAxis);
+
+
+                //}
+                //else if (wp.edgeParam > 0.7)
+                //{
+                //    npln.Rotate(RhinoMath.ToRadians(45), npln.ZAxis);
+                //    npln.Rotate(RhinoMath.ToRadians(-25), npln.XAxis);
+                //    npln.Rotate(RhinoMath.ToRadians(35), npln.YAxis);
+                //    npln.Rotate(RhinoMath.ToRadians(45), npln.ZAxis);
+                //}
+                //else
+                //{
+                //    npln.Rotate(RhinoMath.ToRadians(45), npln.ZAxis);
+                //    npln.Rotate(RhinoMath.ToRadians(90), npln.YAxis);
+                //    //npln.Rotate(RhinoMath.ToRadians(30), npln.XAxis);
+                //    npln.Rotate(RhinoMath.ToRadians(45), npln.ZAxis);
+
+
+
+                //}
                 wp.isVertical = true;
             }
         }
@@ -148,7 +185,33 @@ public partial class WindingAttackAngle : GH_ScriptInstance
             bool isInList = verticalPinsIds.IndexOf(wp.pinIndex) != -1;
             if (isInList)
             {
-                // flip plane other way
+                //npln.Rotate(RhinoMath.ToRadians(270), npln.YAxis);
+                //npln.Rotate(RhinoMath.ToRadians(-90), npln.ZAxis);
+                //if (wp.edgeParam < 0.3)
+                //{
+                //    npln.Rotate(RhinoMath.ToRadians(90), npln.YAxis);
+                //    npln.Rotate(RhinoMath.ToRadians(-20), npln.ZAxis);
+                //    npln.Rotate(RhinoMath.ToRadians(-40), npln.XAxis);
+
+
+
+                //}
+                //else if (wp.edgeParam > 0.7)
+                //{
+                //    npln.Rotate(RhinoMath.ToRadians(40), npln.ZAxis);
+                //    npln.Rotate(RhinoMath.ToRadians(25), npln.YAxis);
+                //    npln.Rotate(RhinoMath.ToRadians(-25), npln.XAxis);
+
+
+
+                //}
+                //else
+                //{
+                //    npln.Rotate(RhinoMath.ToRadians(-70), npln.XAxis);
+                //    npln.Rotate(RhinoMath.ToRadians(45), npln.ZAxis);
+
+
+                //}
                 wp.isVertical = true;
 
             }

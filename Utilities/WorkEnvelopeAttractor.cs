@@ -66,10 +66,16 @@ public partial class WorkEnvelopeAttractor : GH_ScriptInstance
             if (iWorkEnvelope.IsPointInside(pln.Origin, 0.01, true))
             {
                 pln.Origin = iWorkEnvelope.ClosestPoint(pln.Origin);
-                Print(index.ToString());
+                //Print(index.ToString());
                 double newAngle;
-                pln.Origin = adjustPlane(iAxis, pln, iWorkEnvelope, angle, out newAngle);
-                angle = newAngle;
+                bool isValid;
+                Point3d adjustedOrigin = adjustPlane(iAxis, pln, iWorkEnvelope, angle, out newAngle, out isValid);
+                if (isValid)
+                {
+                    pln.Origin = adjustedOrigin;
+                    angle = newAngle;
+                }
+                
             }
             processedAngles.Add(angle);
             pulledPlanes.Add(pln);
@@ -81,7 +87,7 @@ public partial class WorkEnvelopeAttractor : GH_ScriptInstance
     }
      
     // <Custom additional code>
-    Point3d adjustPlane(Curve axis, Plane plnToAdjust, Brep workEnvelope, double currentAngle, out double newAngle)
+    Point3d adjustPlane(Curve axis, Plane plnToAdjust, Brep workEnvelope, double currentAngle, out double newAngle, out bool isValid)
     {
         double param;
         axis.ClosestPoint(plnToAdjust.Origin, out param);
@@ -92,7 +98,7 @@ public partial class WorkEnvelopeAttractor : GH_ScriptInstance
         Curve[] overlapCurves;
         Point3d[] intersectionPoints;
         Intersection.CurveBrep(circle.ToNurbsCurve(), workEnvelope, 0.01, out overlapCurves, out intersectionPoints);
-
+        
         Vector3d vecA = new Vector3d(pt-plnToAdjust.Origin);
         Vector3d vecB = new Vector3d(pt-intersectionPoints[0]);
 
@@ -100,7 +106,28 @@ public partial class WorkEnvelopeAttractor : GH_ScriptInstance
         newAngle = RhinoMath.ToRadians(newAngle);
         newAngle = currentAngle + newAngle;
 
-        return intersectionPoints[1];
+        double surfaceDeflector = (1000 / vecB.Z)*400;
+        
+        vecB.Unitize();
+        Vector3d vecFinal = vecB*surfaceDeflector;
+        if (intersectionPoints.Length < 2)
+        {
+            isValid = false;
+            return new Point3d();
+        }
+        else
+        {
+            isValid = true;
+            if (intersectionPoints[1].Z > 2000)
+            {
+                return intersectionPoints[1] += vecFinal;
+            }
+            else
+            {
+                return intersectionPoints[1];
+            }
+        }
+        
 
     }   
     // </Custom additional code>
