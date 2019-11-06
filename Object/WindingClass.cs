@@ -41,22 +41,40 @@ namespace WindingLibrary
         
 
 
-        public WindingClass(Polyline poly, int _index, Surface _srf, bool isBackSyntax)
+        public WindingClass(Polyline poly, int _index, Surface _srf, bool isBackSyntax, DataTree<Point3d> iAnchors)
         {
             index = _index;
             srf = _srf;
-            Frame(poly[index], isBackSyntax);
+            Frame(poly[index], isBackSyntax, iAnchors);
         }
 
-        void Frame(Point3d pt, bool isBackSyntax)
+        void Frame(Point3d pt, bool isBackSyntax, DataTree<Point3d> iAnchors)
         {
+
+            //  Find closest point from anchor list
+            Point3d closestPoint = new Point3d();
+            double distancePt = double.MaxValue;
+            for (int i = 0; i < iAnchors.BranchCount; i++)
+            {
+                foreach (Point3d anchorPt in iAnchors.Branch(i))
+                {
+                    double tempDist = anchorPt.DistanceTo(pt);
+                    if (tempDist < distancePt)
+                    {
+                        distancePt = tempDist;
+                        closestPoint = anchorPt;
+                    }
+                }
+            }
+            
 
         //  Find Plane Based on Surface
             double u1;
             double v1;
-            srf.ClosestPoint(pt, out u1, out v1);
+            srf.ClosestPoint(closestPoint, out u1, out v1);
             srf.FrameAt(u1, v1, out basePlane);
-            basePlane.Origin = pt;
+            basePlane.Origin = closestPoint;
+
 
         //  Extract Edges
             List<Curve> surfaceEdges = new List<Curve>();
@@ -118,8 +136,7 @@ namespace WindingLibrary
                 iso = srf.IsoCurve(0, v1);
             }
 
-
-         // Orient Base Plane to IsoCurve
+            // Orient Base Plane to IsoCurve
             //double param;
             //iso.ClosestPoint(pt, out param);
             //double paramAdd = 0.01 + param;

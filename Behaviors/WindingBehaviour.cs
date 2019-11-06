@@ -62,8 +62,8 @@ public partial class WindingBehaviour : GH_ScriptInstance
 
         BoundingBox polylineBox = iWindingPolyline.GetBoundingBox(true); //G
 
-        Plane polyBasePlane = new Plane(polylineBox.PointAt(0.5, 0.5, 0.6), new Vector3d(0, 0, -1)); //G
-
+        Plane polyBasePlane = new Plane(polylineBox.PointAt(0.5, 0.5, 0.4), new Vector3d(0, 0, -1)); //G
+        
         for (var index = 0; index < iWindingObjects.Count; index++)
         {
             GH_Path pth = new GH_Path(index);
@@ -114,9 +114,21 @@ public partial class WindingBehaviour : GH_ScriptInstance
         Transform tr = Transform.PlaneToPlane(polyBasePlane, wC.windingCurvePlane);
 
         polylineToCopy.Transform(tr);
+        if (wC.edgeIndex == 0 && (wC.pinIndex == 32 || wC.pinIndex == 33 || wC.pinIndex == 35 || wC.pinIndex == 31 || wC.pinIndex == 37))
+        {
+            Vector3d tfVec = (wC.windingCurvePlane.ZAxis*-80) + (wC.windingCurvePlane.XAxis*0);
+            Transform tf = Transform.Translation(tfVec);
+            polylineToCopy.Transform(tf);
+        }
 
+        if (wC.edgeIndex == 1 || wC.edgeIndex == 3)
+        {
+            Vector3d tfVec = (wC.windingCurvePlane.ZAxis * 20);
+            Transform tf = Transform.Translation(tfVec);
+            polylineToCopy.Transform(tf);
+        }
         //  Mirror the Polyline if loopDirection is counter clockwise - 1
-        if (loopDirection == 1)
+        if (loopDirection == 0)
         {
             Plane mirrorPlane = wC.windingCurvePlane;
             if (wC.edgeIndex == 0 || wC.edgeIndex == 2)
@@ -149,8 +161,13 @@ public partial class WindingBehaviour : GH_ScriptInstance
             pla.Origin = corners[i];
             behav.Add(pla);
         }
-        behav.AddRange(GenerateTransitionPath(wC));
 
+        List<Plane> transPls = GenerateTransitionPath(wC);
+        behav.AddRange(transPls);
+        if (wC.isVertical)
+        {
+            behav.Insert(0, transPls[0]);
+        }
         return behav;
     }
 
@@ -174,7 +191,7 @@ public partial class WindingBehaviour : GH_ScriptInstance
         if (wC.isVertical)
         {
             tempPlane = wC.basePlane;
-            Transform downTrf = Transform.Translation(new Vector3d(tempPlane.ZAxis) * 135);
+            Transform downTrf = Transform.Translation(new Vector3d(tempPlane.ZAxis) * 90);
             tempPlane.Transform(downTrf);
             if (wC.edgeIndex == 0)
             {

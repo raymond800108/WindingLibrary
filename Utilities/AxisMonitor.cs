@@ -95,7 +95,7 @@ public partial class AxisAngleChecker : GH_ScriptInstance
         }
 
         //Axis 2
-        if (-130 <= axis2Angle && axis2Angle <= 20)
+        if (-140 <= axis2Angle && axis2Angle <= -5)
         {
             axis2Bool = true;
         }
@@ -109,7 +109,7 @@ public partial class AxisAngleChecker : GH_ScriptInstance
         }
 
         //Axis 3
-        if (-100 <= axis3Angle && axis3Angle <= 144)
+        if (-120 <= axis3Angle && axis3Angle <= 155)
         {
             axis3Bool = true;
 
@@ -145,7 +145,7 @@ public partial class AxisAngleChecker : GH_ScriptInstance
         }
 
         //Axis 5
-        if (-120 <= axis5Angle && axis5Angle <= 120)
+        if (-122.5 <= axis5Angle && axis5Angle <= 122.5)
         {
             axis5Bool = true;
             if (-1 <= axis5Angle && axis5Angle <= 1)

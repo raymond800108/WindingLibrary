@@ -130,7 +130,7 @@ public partial class WindingAttackAngle : GH_ScriptInstance
             else if (wp.edgeParam > 0.5)
             {
                 npln.Rotate(RhinoMath.ToRadians(35), npln.ZAxis);
-                npln.Rotate(RhinoMath.ToRadians(15), npln.XAxis);
+                //npln.Rotate(RhinoMath.ToRadians(15), npln.XAxis);
             }
             //npln.Rotate(wp.edgeParam > 0.5 ? RhinoMath.ToRadians(65) : RhinoMath.ToRadians(-15), npln.ZAxis);
         }
@@ -173,9 +173,6 @@ public partial class WindingAttackAngle : GH_ScriptInstance
                 //    npln.Rotate(RhinoMath.ToRadians(90), npln.YAxis);
                 //    //npln.Rotate(RhinoMath.ToRadians(30), npln.XAxis);
                 //    npln.Rotate(RhinoMath.ToRadians(45), npln.ZAxis);
-
-
-
                 //}
                 wp.isVertical = true;
             }

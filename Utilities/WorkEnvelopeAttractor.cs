@@ -92,7 +92,6 @@ public partial class WorkEnvelopeAttractor : GH_ScriptInstance
         double param;
         axis.ClosestPoint(plnToAdjust.Origin, out param);
         Point3d pt = axis.PointAt(param);
-
         Circle circle = new Circle(new Plane(pt, new Vector3d(axis.PointAtEnd-axis.PointAtStart)), pt, pt.DistanceTo(plnToAdjust.Origin));
 
         Curve[] overlapCurves;
@@ -106,7 +105,7 @@ public partial class WorkEnvelopeAttractor : GH_ScriptInstance
         newAngle = RhinoMath.ToRadians(newAngle);
         newAngle = currentAngle + newAngle;
 
-        double surfaceDeflector = (1000 / vecB.Z)*400;
+        double surfaceDeflector = (1000 / vecB.Z)*300;
         
         vecB.Unitize();
         Vector3d vecFinal = vecB*surfaceDeflector;
@@ -118,14 +117,20 @@ public partial class WorkEnvelopeAttractor : GH_ScriptInstance
         else
         {
             isValid = true;
-            if (intersectionPoints[1].Z > 2000)
-            {
-                return intersectionPoints[1] += vecFinal;
-            }
-            else
-            {
-                return intersectionPoints[1];
-            }
+                double highestZ = 0;
+                Point3d toReturn = new Point3d();
+                foreach (Point3d tempPt in intersectionPoints)
+                {
+                    double tempDist = tempPt.Z;
+                    if (tempDist > highestZ)
+                    {
+                        highestZ = tempDist;
+                        toReturn = tempPt;
+                    }
+                }
+
+                return toReturn += vecFinal;
+            //return intersectionPoints[1] += vecFinal;
         }
         
 

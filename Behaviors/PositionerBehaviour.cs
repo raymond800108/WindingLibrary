@@ -69,7 +69,7 @@ public partial class CustomAxisRotation : GH_ScriptInstance
             {
                 if (wp.edgeParam > 0.5)
                 {
-                    positionerAngles.Add(-190, pth);
+                    positionerAngles.Add(-210, pth);
                 }
                 else
                 {
@@ -99,7 +99,7 @@ public partial class CustomAxisRotation : GH_ScriptInstance
                 }
                 else
                 {
-                    positionerAngles.Add(-185, pth);
+                    positionerAngles.Add(-195, pth);
                 }
 
 
@@ -111,7 +111,7 @@ public partial class CustomAxisRotation : GH_ScriptInstance
                 {
                     positionerAngles.Add(-205, pth);
                 }
-                else if(wp.edgeParam < 0.2)
+                else if(wp.edgeParam < 0.15)
                 {
                     positionerAngles.Add(-220, pth);
                 }

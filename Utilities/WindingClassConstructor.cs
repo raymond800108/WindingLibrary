@@ -64,7 +64,7 @@ public partial class WindingClassConstructor : GH_ScriptInstance
         
         for (int i = 0; i < iPolyline.Count; i++)
         {
-            WindingClass tempWC = new WindingClass(iPolyline, i, iSrf, isBackSyntax);
+            WindingClass tempWC = new WindingClass(iPolyline, i, iSrf, isBackSyntax, iAnchors);
             windingPoints.Add(tempWC);
             IdentifyPinIndexes(tempWC, iAnchors);
         }

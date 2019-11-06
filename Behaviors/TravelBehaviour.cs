@@ -158,69 +158,52 @@ public partial class TravelBehaviour : GH_ScriptInstance
             Plane xyPlane = Plane.WorldXY;
             xyPlane.Origin = rpln.Origin;
             double distance = wC.basePlane.Origin.DistanceTo(nextWC.basePlane.Origin);
-            xyPlane.Rotate(RhinoMath.ToRadians(180), xyPlane.XAxis, xyPlane.Origin);
-            xyPlane.Rotate(RhinoMath.ToRadians(-15), xyPlane.YAxis, xyPlane.Origin);
 
-            // Rotate plane so robot is pulling fiber, reduces friction
+            // Universal Adjustments
+            xyPlane.Rotate(RhinoMath.ToRadians(-90), xyPlane.ZAxis, xyPlane.Origin);
+            xyPlane.Rotate(RhinoMath.ToRadians(-180), xyPlane.YAxis, xyPlane.Origin);
 
+
+
+            int extremetiesThreshold = 1500;
             if (nextWC.basePlane.Origin.Y > wC.basePlane.Origin.Y)
             {
+                // Rotate plane so robot is pulling fiber, reduces friction
+                xyPlane.Rotate(RhinoMath.ToRadians(-45), xyPlane.YAxis, xyPlane.Origin);
 
-                xyPlane.Rotate(RhinoMath.ToRadians(-45), xyPlane.XAxis, xyPlane.Origin);
-                if (xyPlane.Origin.Y > 1500)
+                // Reorient if winding at extreme ends of component
+                if (xyPlane.Origin.Y > extremetiesThreshold)
                 {
-                    //xyPlane.Rotate(RhinoMath.ToRadians(45), xyPlane.YAxis, xyPlane.Origin);
-                    if (nextWC.edgeIndex == 0)
-                    {
-                        xyPlane.Rotate(RhinoMath.ToRadians(45), xyPlane.YAxis, xyPlane.Origin);
-                    }
-                    else if (nextWC.edgeIndex == 2)
-                    {
-                        xyPlane.Rotate(RhinoMath.ToRadians(-15), xyPlane.XAxis, xyPlane.Origin);
-                        xyPlane.Rotate(RhinoMath.ToRadians(30), xyPlane.YAxis, xyPlane.Origin);
-                    }
-                    else
-                    {
-                        xyPlane.Rotate(RhinoMath.ToRadians(45), xyPlane.YAxis, xyPlane.Origin);
-                    }
+                    xyPlane.Rotate(RhinoMath.ToRadians(-35), xyPlane.ZAxis, xyPlane.Origin);
+                    xyPlane.Rotate(RhinoMath.ToRadians(-25), xyPlane.XAxis, xyPlane.Origin);
+
                 }
-                else if (xyPlane.Origin.Y < -1500)
+                else if (xyPlane.Origin.Y < -extremetiesThreshold)
                 {
-                    xyPlane.Rotate(RhinoMath.ToRadians(95), xyPlane.YAxis, xyPlane.Origin);
-
+                    xyPlane.Rotate(RhinoMath.ToRadians(35), xyPlane.ZAxis, xyPlane.Origin);
                 }
             }
             else
             {
-                xyPlane.Rotate(RhinoMath.ToRadians(45), xyPlane.XAxis, xyPlane.Origin);
-                if (xyPlane.Origin.Y < -1500)
+                // Rotate plane so robot is pulling fiber, reduces friction
+                xyPlane.Rotate(RhinoMath.ToRadians(45), xyPlane.YAxis, xyPlane.Origin);
+
+                // Reorient if winding at extreme ends of component
+                if (xyPlane.Origin.Y < -extremetiesThreshold)
                 {
+                    xyPlane.Rotate(RhinoMath.ToRadians(35), xyPlane.ZAxis, xyPlane.Origin);
+                    xyPlane.Rotate(RhinoMath.ToRadians(-25), xyPlane.XAxis, xyPlane.Origin);
 
-                    if (nextWC.edgeIndex == 0)
-                    {
-                        xyPlane.Rotate(RhinoMath.ToRadians(60), xyPlane.YAxis, xyPlane.Origin);
-                        xyPlane.Rotate(RhinoMath.ToRadians(0), xyPlane.XAxis, xyPlane.Origin);
-
-                    }
-                    else if (nextWC.edgeIndex == 2)
-                    {
-
-                        //xyPlane.Rotate(RhinoMath.ToRadians(30), xyPlane.YAxis, xyPlane.Origin);
-                        xyPlane.Rotate(RhinoMath.ToRadians(75), xyPlane.YAxis, xyPlane.Origin);
-                        //xyPlane.Rotate(RhinoMath.ToRadians(40), xyPlane.ZAxis, xyPlane.Origin);
-                    }
-                    else
-                    {
-                        xyPlane.Rotate(RhinoMath.ToRadians(55), xyPlane.YAxis, xyPlane.Origin);
-
-                    }
                 }
-                else if (xyPlane.Origin.Y > 1900)
+                else if (xyPlane.Origin.Y > extremetiesThreshold)
                 {
-                    //xyPlane.Rotate(RhinoMath.ToRadians(65), xyPlane.YAxis, xyPlane.Origin);
+                    xyPlane.Rotate(RhinoMath.ToRadians(-35), xyPlane.ZAxis, xyPlane.Origin);
                 }
 
             }
+
+
+            // Remove first few and last few travel planes
 
             if (i < 0 || i > divisionCount-0)
             {
